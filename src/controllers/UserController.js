@@ -1,7 +1,7 @@
 const connection = require('../database/connection')
 
 const responseModel = {
-    response: false,
+    success: false,
     data: [],
     error: []
 }
@@ -16,15 +16,11 @@ module.exports = {
         try {
             const [, affectedRows] = await connection.query(`
                 INSERT INTO m2_usuarios (nome, password, login, idequipe, ativo) VALUES(
-                    '${nome}',
-                    '${password}',
-                    '${login}',
-                    ${idequipe},
-                    1
+                    '${nome}', '${password}', '${login}', ${idequipe}, 1
                 );
             `);
 
-            response.success = affectedRows > 0
+            response.success = affectedRows.changes > 0
         } catch(e) {
             console.log(e)
             response.error = ['Error']
@@ -36,16 +32,21 @@ module.exports = {
     async data(req, res) {
         const response = {...responseModel}
 
-        const { idequipe } = req.body;
+        const { idusuario } = req.query;
 
-        const [data] = await connection.query(`
-            SELECT * FROM m2_equipes
-            WHERE idequipe=${idequipe}
-        `);
+        try {
+            const [data] = await connection.query(`
+                SELECT * FROM m2_usuarios
+                WHERE idusuario=${idusuario}
+            `);
 
-        if(data.length > 0) {
-            response.success = true
-            response.data = data
+            if(data.length > 0) {
+                response.success = true
+                response.data = data
+            }
+        } catch(e) {
+            console.log(e)
+            response.error = ['Error']
         }
 
         return res.json(response)
@@ -54,14 +55,19 @@ module.exports = {
     async list_active(req, res) {
         const response = {...responseModel}
 
-        const [data] = await connection.query(`
-            SELECT * FROM m2_equipes
-            WHERE ativo=1
-        `);
+        try {
+            const [data] = await connection.query(`
+                SELECT * FROM m2_usuarios
+                WHERE ativo=1
+            `);
 
-        if(data.length > 0) {
-            response.success = true
-            response.data = data
+            if(data.length > 0) {
+                response.success = true
+                response.data = data
+            }
+        }  catch(e) {
+            console.log(e)
+            response.error = ['Error']
         }
 
         return res.json(response)
@@ -70,14 +76,19 @@ module.exports = {
     async list_inactive(req, res) {
         const response = {...responseModel}
 
-        const [data] = await connection.query(`
-            SELECT * FROM m2_equipes
-            WHERE ativo=0
-        `);
+        try {
+            const [data] = await connection.query(`
+                SELECT * FROM m2_usuarios
+                WHERE ativo=0
+            `);
 
-        if(data.length > 0) {
-            response.success = true
-            response.data = data
+            if(data.length > 0) {
+                response.success = true
+                response.data = data
+            }
+        }  catch(e) {
+            console.log(e)
+            response.error = ['Error']
         }
 
         return res.json(response)
@@ -86,11 +97,42 @@ module.exports = {
     async update(req, res) {
         const response = {...responseModel}
 
+        const { nome, password, login, idequipe, idusuario } = req.body;
+
+        try {
+            await connection.query(`
+                UPDATE m2_usuarios SET
+                    ${nome ? "nome='"+nome+"'" : ''} ${nome && (password || login || idequipe) ? ',' : ''}
+                    ${password ? "password='"+password+"'" : ''} ${(nome || password) && (login || idequipe) ? ',' : ''}
+                    ${login ? "login='"+login+"'" : ''} ${(nome || password || login) && (idequipe) ? ',' : ''}
+                    ${idequipe ? "idequipe="+idequipe : ''}
+                WHERE idusuario=${idusuario}
+            `);
+
+            response.success = true
+        } catch(e) {
+            console.log(e)
+            response.error = ['Error']
+        }
+
         return res.json(response)
     },
 
     async delete(req, res) {
         const response = {...responseModel}
+
+        const { idusuario } = req.body;
+
+        try {
+            await connection.query(`
+                UPDATE m2_usuarios SET ativo=0 WHERE idusuario=${idusuario}
+            `);
+
+            response.success = true
+        } catch(e) {
+            console.log(e)
+            response.error = ['Error']
+        }
 
         return res.json(response)
     },
