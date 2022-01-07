@@ -1,15 +1,40 @@
-- m2_equipes
-idequipe (primary key)
-nome (car 150)
-ativo (int)
+# NodeJS CRUD M2
 
-- m2_usuarios
-idusuario (primary key)
-nome (chart 150)
-password (char 150)
-login (char 30)
-idequipe (foregeinkey)
-ativo (int)
+## Começando 📦
 
-cada usuario participa de apenas um grupo
-criar um seed para dez usuarios de testes nas duas tabelas
+CRUD teste backend.
+Projeto utilizando NodeJS, Sequelize e Sqlite.
+
+## Pré-requisitos 📌
+
+Precisa ter o **docker** instalado.
+
+## Instalação ⚙️
+
+Passo a passo para a execução da aplicação:
+
+Para criar as tabelas e inserir dados de teste:
+```
+npx sequelize-cli db:migrate
+```
+
+Para inserir os dados iniciais:
+```
+npx sequelize-cli db:seed:all
+```
+
+Para criar o container do servidor:
+```
+docker build . -t viniciusalencardev/testem2backend
+```
+
+Para inciar o servidor:
+```
+docker run -p 3030:3030 -d viniciusalencardev/testem2backend
+```
+
+Estará disponivel em http://localhost:3030
+
+
+* Agora é so usar 📢
+* Obrigado
